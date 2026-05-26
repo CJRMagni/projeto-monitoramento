@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Permissions-Policy" content="display-capture=(self)">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="/js/config/supabase.js"></script>
+
+<script src='https://8x8.vc/vpaas-magic-cookie-99e1f2c24e7b4ec9a7a157ab0126c6b8/external_api.js' async></script>
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Alertas</title>
+
+  <link rel="stylesheet" href="/css/dashboard.css">
+
+
+</head>
+<body>
+  <h2>Painel de Alertas</h2>
+
+  <button id="btnAtivarSom" style="
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    z-index: 999999;
+  ">
+  🔊 Ativar Som
+  </button>
+
+<!--  <button id="btnGravar" class="gravar-btn">🔴 Gravar Tela</button>
+  <button id="btnParar" class="parar-btn" style="display:none;">⏹ Parar</button> -->
+
+<!-- GRID PRINCIPAL -->
+<div class="app-container">
+
+  <!-- COLUNA DOS CARDS (ESQUERDA) -->
+  <div class="cards-column" id="cardsColumn">
+    
+
+  </div>
+
+  <!-- COLUNA DO VÍDEO (DIREITA) -->
+  <div class="video-column">
+    <div class="video-preview" style="display:none;" id="previewWrap">
+      <div id="jaas-container"></div>
+    </div>
+  </div>
+
+</div>
+
+  <script src="/js/dashboard.js"></script>
+
+</body>
+</html>

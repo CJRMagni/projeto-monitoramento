@@ -1,0 +1,152 @@
+    /* container geral com 2 colunas */
+  .app-container {
+    display: grid;
+    grid-template-columns: 380px 1fr; 
+    height: 100vh;
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  /* coluna esquerda: cards */
+  .cards-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;      /* scroll automático se preencher */
+    padding-right: 5px;
+  }
+
+  /* coluna direita: vídeo */
+  .video-column {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+
+  .video-preview {
+    width: 100%;
+    height: 100%;
+    background: #000;       /* fundo preto enquanto carrega */
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* Jitsi ocupa tudo */
+  #jaas-container {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Mantém seu design original dos cards */
+  .card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+  }
+
+  .card {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  /* status */
+  .status-hidden {
+    display: none;
+  }
+
+  .status {
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 6px;
+    background: #ff3b30;     /* vermelho forte */
+    color: #fff;             /* texto branco */
+    border: 2px solid #b30000;
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+    animation: pulseStatus 1s infinite;
+  }
+
+  @keyframes pulseStatus {
+    0%   { box-shadow: 0 0 6px rgba(255, 0, 0, 0.4); }
+    50%  { box-shadow: 0 0 12px rgba(255, 0, 0, 0.9); }
+    100% { box-shadow: 0 0 6px rgba(255, 0, 0, 0.4); }
+  }
+  /* botão de áudio */
+  .mute-btn {
+    padding: 6px 10px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 6px;
+    border: none;
+    background: #eee;
+  }
+
+
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+
+    /* Linha de cada card */
+    .card-row {
+      display: flex;
+      align-items: center;
+      background: white;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 6px solid #007bff;
+      transition: 0.3s;
+    }
+
+    .alerta {
+      border-left-color: red !important;
+      animation: piscar 0.7s infinite;
+    }
+
+    @keyframes piscar {
+      0% { background-color: white; }
+      50% { background-color: #ffb3b3; }
+      100% { background-color: white; }
+    }
+
+    /* animação suave */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    .gravar-btn, .parar-btn {
+      padding: 10px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .gravar-btn {
+      background: #d32f2f;
+      color: white;
+    }
+
+    .parar-btn {
+      background: #333;
+      color: white;
+    }

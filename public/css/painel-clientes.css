@@ -1,0 +1,44 @@
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --accent: #0d6efd;
+      --muted: #667085;
+      --radius: 16px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html, body { height: 100%; margin: 0; background: var(--bg); }
+    .wrap { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .card { width: 100%; max-width: 520px; background: var(--card); border-radius: 20px; box-shadow: 0 8px 30px rgba(10,10,20,.06); padding: 20px; }
+    header { display: flex; align-items: center; gap: 12px; }
+    h1 { font-size: 20px; margin: 0; }
+    p.lead { margin: 6px 0 18px; color: var(--muted); font-size: 14px; }
+    .buttons { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media(min-width:560px) { .buttons { grid-template-columns: 1fr 1fr; } }
+    .btn { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; border: 1px solid rgba(10,10,20,.04); cursor: pointer; background: linear-gradient(180deg,#fff,#fbfdff); box-shadow: 0 4px 10px rgba(10,10,20,.03); }
+    .btn:active { transform: translateY(1px); }
+    .btn .icon { width: 36px; height: 36px; flex: 0 0 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    .btn .label { flex: 1; text-align: left; }
+    .btn .hint { font-size: 12px; color: var(--muted); }
+    .video-preview { margin-top: 16px; border-radius: 12px; overflow: hidden; background: #000; display: none; }
+    video { width: 100%; height: auto; display: block; }
+    footer { margin-top: 16px; font-size: 12px; color: var(--muted); text-align: center; }
+    .status-online {
+      background:#28a745 !important;
+    }
+
+    .status-offline {
+      background:#adb5bd !important;
+    }
+    #previewWrap {
+      width: 100%;
+      height: 420px; /* AUMENTE AQUI COMO QUISER */
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      display: none; /* você liga com display:block quando abrir */
+    }
+
+    #jaas-container {
+      width: 100%;
+      height: 100%;
+    }
