@@ -72,13 +72,13 @@
 
                 <button 
                   class="mute-btn" 
-                  onclick="toggleMute('rua${rua.slug}')"
+                  onclick="toggleMute('${rua.slug}')"
                 >
                   🔊
                 </button>
 
                 <div 
-                  id="status-rua${rua.slug}" 
+                  id="status-${rua.slug}" 
                   class="status status-hidden"
                 >
                 </div>
