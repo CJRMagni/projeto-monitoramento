@@ -3,6 +3,7 @@
 <meta http-equiv="Permissions-Policy" content="display-capture=(self)">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script src="/js/config/supabase.js"></script>
+<link rel="manifest" href="/manifest.json">
 
 <script src='https://8x8.vc/vpaas-magic-cookie-99e1f2c24e7b4ec9a7a157ab0126c6b8/external_api.js' async></script>
 <head>
@@ -101,7 +102,7 @@
 
     <div class="modal-header">
 
-      <h2>Finalizar Atendimento</h2>
+      <h2>Registro de Atendimento</h2>
 
       <button 
         class="btn-close"
@@ -192,6 +193,21 @@
 </div>
 
   <script src="/js/dashboard.js"></script>
+
+  <script>
+
+    if ('serviceWorker' in navigator) {
+
+      navigator.serviceWorker
+      .register('/sw.js')
+
+      .then(() => {
+          console.log('Service Worker registrado')
+      })
+
+    }
+
+    </script>
 
 </body>
 </html>

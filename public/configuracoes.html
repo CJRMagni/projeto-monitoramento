@@ -62,45 +62,111 @@
 <!-- CONTEÚDO -->
 <div class="page-content">
 
-  <div class="config-card">
+ <!-- MANUAL OPERACIONAL -->
+<div class="manual-card">
 
-    <h2>Preferências do Sistema</h2>
+  <button 
+    class="manual-btn"
+    onclick="toggleManual()"
+  >
+    📘 Manual Operacional
+    <span id="manualIcon">▼</span>
+  </button>
 
-    <div class="config-item">
+  <div id="manualContent" class="manual-content">
 
-      <label>
-        Volume dos Alertas
-      </label>
+    <div class="manual-section">
 
-      <input type="range" min="0" max="100" value="70">
+      <h3>Introdução</h3>
 
-    </div>
-
-    <div class="config-item">
-
-      <label>
-        Ativar som automaticamente
-      </label>
-
-      <input type="checkbox" checked>
-
-    </div>
-
-    <div class="config-item">
-
-      <label>
-        Tema escuro
-      </label>
-
-      <input type="checkbox">
+      <p>
+        Este sistema é destinado ao monitoramento e
+        atendimento de alertas operacionais.
+      </p>
 
     </div>
 
-    <button class="btn-save">
-      Salvar Configurações
-    </button>
+    <div class="manual-section">
+
+      <h3>Atendimento Inicial</h3>
+
+      <ul>
+
+        <li>
+          Atender imediatamente a solicitação.
+        </li>
+
+        <li>
+          Identificar o tipo de ocorrência.
+        </li>
+
+        <li>
+          Manter comunicação clara e objetiva.
+        </li>
+
+      </ul>
+
+    </div>
+
+    <div class="manual-section">
+
+      <h3>Procedimentos de Emergência</h3>
+
+      <ul>
+
+        <li>
+          🚨 Acionar suporte externo quando necessário.
+        </li>
+
+        <li>
+          🚔 Encaminhar autoridades competentes.
+        </li>
+
+        <li>
+          📹 Registrar informações relevantes.
+        </li>
+
+      </ul>
+
+    </div>
+
+    <div class="manual-section">
+
+      <h3>Registro Obrigatório</h3>
+
+      <p>
+        Todo atendimento deve conter observações
+        detalhadas sobre a ocorrência.
+      </p>
+
+    </div>
+
+    <div class="manual-section">
+
+      <h3>Conduta do Operador</h3>
+
+      <ul>
+
+        <li>Manter cordialidade.</li>
+
+        <li>Evitar encerramentos indevidos.</li>
+
+        <li>Garantir registro correto da ocorrência.</li>
+
+      </ul>
+
+    </div>
+
+    <div class="manual-footer">
+
+      Última atualização:
+      05/08/2026 • Versão 1.0
+
+    </div>
 
   </div>
+
+</div>
 
 </div>
 

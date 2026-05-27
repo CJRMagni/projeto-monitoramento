@@ -1,0 +1,9 @@
+{
+  "name": "Painel de Alertas",
+  "short_name": "Alertas",
+  "start_url": "/login",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "orientation": "portrait"
+}

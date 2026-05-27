@@ -59,3 +59,25 @@ window.addEventListener("DOMContentLoaded", () => {
    }
 
 });
+
+function toggleManual(){
+
+   const content =
+   document.getElementById("manualContent");
+
+   const icon =
+   document.getElementById("manualIcon");
+
+   content.classList.toggle("active");
+
+   if(content.classList.contains("active")){
+
+      icon.innerText = "▲";
+
+   } else {
+
+      icon.innerText = "▼";
+
+   }
+
+}
