@@ -91,6 +91,7 @@
     const usuarioAtual = {
       id: rua,
       nome: rua,
+      email: "email",
       online: true,
       perfil: "Cliente"
     };
@@ -155,6 +156,8 @@
 
     // Estado inicial
     setOffline();
+
+    let emailAtendente = ""
     
 
     function atualizarListaOnline(lista){
@@ -164,7 +167,11 @@
       // verificar atendentes online
       const onlineAtendente = lista.filter(c => c.id == 'atendente');
 
+      console.log("Online atendente", onlineAtendente)
+
       if(onlineAtendente.length > 0){
+
+        emailAtendente = onlineAtendente[0].email || ""
         
         setOnline()
 
@@ -198,7 +205,6 @@
 
         console.log("enviar mensagem", btnID)
 
-
         // inserir no supabase
         try {
           const { data, error } = await supabaseGet
@@ -206,6 +212,7 @@
             .insert({
               id_rua: rua,
               tipo_servico: btnID,
+              atendente : emailAtendente,
               dispositivo: dispositivoTipo,
               conexao: conexaoTipo
             });

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Permissions-Policy" content="display-capture=(self)">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="/js/config/supabase.js"></script>
+
+  <title>Historico</title>
+
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/historico.css">
+
+</head>
+
+<body>
+
+<!-- TOPO -->
+<div class="topbar">
+
+  <button id="menuBtn" class="menu-btn">
+    ☰
+  </button>
+
+  <div class="topbar-title">
+    Configurações
+  </div>
+
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    Menu
+  </div>
+
+  <a href="/dashboard/lapa1">
+    🏠 Dashboard
+  </a>
+
+  <a href="/historico">
+    📜 Histórico
+  </a>
+
+  <a href="/configuracoes">
+    ⚙️ Configurações
+  </a>
+
+  <a href="/usuarios">
+    👤 Usuários
+  </a>
+
+  <a href="#" onclick="logout()">
+    🚪 Sair
+  </a>
+
+</div>
+
+<div id="overlay" class="overlay"></div>
+
+<!-- CONTEÚDO -->
+<div class="page-content">
+
+  <div class="history-card">
+
+    <div class="history-header">
+
+      <h2>Histórico de Alertas</h2>
+
+      <input 
+        type="text" 
+        id="filtroBusca"
+        placeholder="Buscar rua..."
+      >
+
+    </div>
+
+    <div class="table-wrap">
+
+      <table class="history-table">
+
+        <thead>
+
+          <tr>
+            <th></th> 
+            <th>ID</th>
+            <th>Data</th>
+            <th>Atendente</th>
+            <th>Anotações</th>
+            <th>Rua</th>
+            <th>Serviço</th>
+            <th>Dispositivo</th>
+            <th>Conexão</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="tbodyHistorico">
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script src="/js/menu.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/historico.js"></script>
+
+</body>
+</html>

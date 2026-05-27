@@ -1,5 +1,41 @@
 
 
+  async function verificarLogin(){
+
+    const sessionStorage = localStorage.getItem("usuarioLogado");
+
+    if(!sessionStorage){
+
+        window.location.href = "/login.html";
+        return;
+
+    }
+
+    const session = JSON.parse(sessionStorage);
+
+    // verifica expiração
+    const agora = Math.floor(Date.now() / 1000);
+
+    if(session.expires_at < agora){
+
+        localStorage.removeItem("usuarioLogado");
+
+        window.location.href = "/login.html";
+
+        return;
+
+    }
+
+    //console.log("Usuário autenticado");
+
+  }
+
+    verificarLogin();
+
+    const usuario = JSON.parse(
+      localStorage.getItem("usuarioLogado")
+    );
+    
     window.addEventListener("load", () => {
         setTimeout(() => {
         alert("Para receber alertas sonoros, clique em OK para habilitar o som.");
@@ -12,17 +48,17 @@
 
     if(btnAtivarSom){
 
-    btnAtivarSom.addEventListener("click", () => {
+      btnAtivarSom.addEventListener("click", () => {
 
-        somGlobalHabilitado = true;
+          somGlobalHabilitado = true;
 
-        alertaSom.play().catch(err => {
-            console.warn("Som bloqueado");
-        });
+          alertaSom.play().catch(err => {
+              //console.warn("Som bloqueado");
+          });
 
-        alert("Som liberado!");
+          alert("Som liberado!");
 
-    })
+      })
 
     }
 
@@ -36,7 +72,7 @@
 
       const slug = window.location.pathname.split('/').pop()
 
-      console.log("slug", slug)
+      //console.log("slug", slug)
 
       const { data, error } = await supabaseGet
           .from('ruas')
@@ -44,10 +80,10 @@
           .eq('conjunto', slug)
           .eq('status', 'ATIVO')
 
-      console.log("ruas", data)
+      //console.log("ruas", data)
 
       if(error){
-          console.log(error)
+      console.log(error)
           return
       }
 
@@ -89,7 +125,7 @@
 
       })
 
-      console.log("Lista ruas", listaRuas)
+      //console.log("Lista ruas", listaRuas)
 
     }
 
@@ -107,9 +143,12 @@
     const usuarioAtual = {
       id: rua,
       nome: rua,
+      email: usuario.email,
       online: true,
       perfil: "atendente"
     };
+
+    console.log("usuarioAtual", usuarioAtual)
 
     // cria o canal (nome da sala)
     const canalChat = supabaseGet.channel(CHANNEL_NAME, {
@@ -125,7 +164,7 @@
         const online = Object.values(estado).flat();
         dbg("Estado presence:", estado);
         dbg("Array online:", online);
-        console.log("online", online)
+        //console.log("online", online)
         // vamos mostrar todos os usuarios menos o usuarios atual
         //var conectados = online.filter(c => c.id !== usuarioGet.id);
         atualizarListaOnline(online); // sua função de UI
@@ -152,15 +191,15 @@
     });
 
     function atualizarListaOnline(lista) {
-      console.log("lista", lista, idsEmSala)
+
       // vamos desabilitar todos os alertas
       const todosCards = document.querySelectorAll(".card");
-      console.log(todosCards)
+      //console.log(todosCards)
       todosCards.forEach(c => c.classList.remove("alerta"));
 
       // vamos desabilitar todos os alertas
       const todosStatus = document.querySelectorAll(".status");
-      console.log(todosStatus)
+
       todosStatus.forEach(c => c.classList.add("status-hidden"));
 
       // vamos remover todas as opções de texto....
@@ -180,11 +219,8 @@
         }
 
       // Para cada card, decide se toca som
-      console.log("listaRuas2", listaRuas, idsOnline)
       listaRuas.forEach(ruaId => {
         const ativo = idsOnline.includes(ruaId);
-
-        console.log("ativo", ativo)
 
         if (ativo) {
           document.getElementById(ruaId).classList.add("alerta");
@@ -237,7 +273,7 @@
         // já existe intervalo? Não cria outro.
         if (intervalosPorRua[ruaId]) return;
 
-        console.log(`Iniciando alerta para ${ruaId}`);
+        //console.log(`Iniciando alerta para ${ruaId}`);
 
         // toca imediatamente
         alertaSom.play().catch(()=>{});
@@ -255,6 +291,12 @@
       } else {
         // parar som
         if (intervalosPorRua[ruaId]) {
+
+            const divStatus = document.getElementById("status-" + ruaId);
+
+            const idMensagem = divStatus.dataset.idMensagem;
+
+          abrirFormularioAtendimento(idMensagem, ruaId);
           console.log(`Parando alerta para ${ruaId}`);
           clearInterval(intervalosPorRua[ruaId]);
           delete intervalosPorRua[ruaId];
@@ -287,6 +329,9 @@
         const tipo_servico = msg.tipo_servico
 
         let statusTexto = ""
+        let idMensagem = msg.id
+      
+
 
         if(tipo_servico == "btnVideo"){
 
@@ -306,25 +351,42 @@
 
         }
 
-        atualizarStatus(ruaId, statusTexto)
+        atualizarStatus(ruaId, statusTexto, idMensagem)
 
       }
     )
     .subscribe();
 
-    function atualizarStatus(ruaId, statusTexto) {
-      const divStatus = document.getElementById("status-" + ruaId);
+    function atualizarStatus(
+      ruaId,
+      statusTexto,
+      idMensagem
+    ){
+
+      const divStatus =
+      document.getElementById("status-" + ruaId);
+
       if (!divStatus) return;
 
+      // salva o id da mensagem
+      divStatus.dataset.idMensagem = idMensagem;
+
       if (!statusTexto || statusTexto.trim() === "") {
-        // oculta o status
-        divStatus.textContent = "";
-        divStatus.classList.add("status-hidden");
+
+          // oculta o status
+          divStatus.textContent = "";
+
+          divStatus.classList.add("status-hidden");
+
       } else {
-        // exibe o status
-        divStatus.textContent = statusTexto;
-        divStatus.classList.remove("status-hidden");
+
+          // exibe o status
+          divStatus.textContent = statusTexto;
+
+          divStatus.classList.remove("status-hidden");
+
       }
+
     }
 
     // todos ids em alerta atual
@@ -391,6 +453,115 @@
           
     }
 
+    window.addEventListener("DOMContentLoaded", () => {
+
+      console.log("Dashboard carregado");
+
+      const menuBtn = document.getElementById("menuBtn");
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+
+      menuBtn.addEventListener("click", () => {
+
+          sidebar.classList.toggle("active");
+          overlay.classList.toggle("active");
+
+      });
+
+      overlay.addEventListener("click", () => {
+
+          sidebar.classList.remove("active");
+          overlay.classList.remove("active");
+
+      });
+
+    });
+
+    async function logout(){
+
+      await supabaseGet.auth.signOut();
+
+      window.location.href = "/login";
+
+    }
+
+    let alertaAtual = null;
+
+    // abre modal
+    function abrirFormularioAtendimento(idMensagem, idRua){
+
+      alertaAtual = { idAlerta: idMensagem, idRua: idRua };
+
+      document
+          .getElementById("modalAtendimento")
+          .classList.add("active");
+
+    }
+
+    // fecha modal
+    function fecharModalAtendimento(){
+
+      document
+          .getElementById("modalAtendimento")
+          .classList.remove("active");
+
+    }
+
+    // salvar atendimento
+    async function salvarAtendimento(){
+
+      const status =
+      document.getElementById("statusAtendimento").value;
+
+      const prioridade =
+      document.getElementById("prioridadeAtendimento").value;
+
+      const suporteExterno =
+      document.getElementById("suporteExterno").value;
+
+      const observacoes =
+      document.getElementById("observacoesAtendimento").value;
+
+      const usuario = JSON.parse(
+          localStorage.getItem("usuarioDados")
+      );
+
+      const { data, error } = await supabaseGet
+          .from("atendimentos")
+          .insert({
+
+            id_alerta: alertaAtual?.idAlerta || null,
+
+            id_rua: alertaAtual?.idRua || null,
+
+            operador: usuario?.email || "OPERADOR",
+
+            status,
+
+            prioridade,
+
+            suporte_externo: suporteExterno,
+
+            observacoes
+
+          });
+
+      if(error){
+
+          console.log(error);
+
+          alert("Erro ao salvar");
+
+          return;
+
+      }
+
+      alert("Atendimento salvo!");
+
+      fecharModalAtendimento();
+
+    }
+
 
     let recorder;
     let chunks = [];
@@ -434,4 +605,7 @@
       document.getElementById("btnGravar").style.display = "inline-block";
       document.getElementById("btnParar").style.display = "none";
     });
+
+
+    
 

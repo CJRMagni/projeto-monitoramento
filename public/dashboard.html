@@ -14,7 +14,50 @@
 
 </head>
 <body>
-  <h2>Painel de Alertas</h2>
+  <!-- MENU TOPO -->
+<div class="topbar">
+
+  <button id="menuBtn" class="menu-btn">
+    ☰
+  </button>
+
+  <div class="topbar-title">
+    Painel de Alertas
+  </div>
+
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    Menu
+  </div>
+
+  <a href="/dashboard/lapa1">
+    🏠 Dashboard
+  </a>
+
+  <a href="/historico">
+    📜 Histórico
+  </a>
+
+  <a href="/configuracoes">
+    ⚙️ Configurações
+  </a>
+
+  <a href="/manual">
+    👤 Usuários
+  </a>
+
+  <a href="#" onclick="logout()">
+    🚪 Sair
+  </a>
+
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay" class="overlay"></div>
 
   <button id="btnAtivarSom" style="
     position: fixed;
@@ -47,6 +90,103 @@
     <div class="video-preview" style="display:none;" id="previewWrap">
       <div id="jaas-container"></div>
     </div>
+  </div>
+
+</div>
+
+<!-- MODAL FORMULÁRIO -->
+<div id="modalAtendimento" class="modal-atendimento">
+
+  <div class="modal-content">
+
+    <div class="modal-header">
+
+      <h2>Finalizar Atendimento</h2>
+
+      <button 
+        class="btn-close"
+        onclick="fecharModalAtendimento()"
+      >
+        ✖
+      </button>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Status do Atendimento</label>
+
+      <select id="statusAtendimento">
+
+        <option value="">Selecione</option>
+
+        <option value="RESOLVIDO">
+          Resolvido
+        </option>
+
+        <option value="NAO_RESOLVIDO">
+          Não Resolvido
+        </option>
+
+        <option value="TROTE">
+          Trote
+        </option>
+
+        <option value="ENCAMINHADO">
+          Encaminhado
+        </option>
+
+      </select>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Prioridade</label>
+
+      <select id="prioridadeAtendimento">
+
+        <option value="BAIXA">Baixa</option>
+        <option value="MEDIA">Média</option>
+        <option value="ALTA">Alta</option>
+        <option value="CRITICA">Crítica</option>
+
+      </select>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Necessitou suporte externo?</label>
+
+      <select id="suporteExterno">
+
+        <option value="NAO">Não</option>
+        <option value="SIM">Sim</option>
+
+      </select>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Observações</label>
+
+      <textarea 
+        id="observacoesAtendimento"
+        rows="5"
+        placeholder="Digite observações do atendimento..."
+      ></textarea>
+
+    </div>
+
+    <button 
+      class="btn-salvar-atendimento"
+      onclick="salvarAtendimento()"
+    >
+      Salvar Atendimento
+    </button>
+
   </div>
 
 </div>
