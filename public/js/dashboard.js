@@ -30,7 +30,70 @@
 
   }
 
-    verificarLogin();
+   verificarLogin();
+
+   const canalAlertas = supabaseGet
+    .channel("alertas_push")
+
+    .on(
+      "postgres_changes",
+      {
+          event: "INSERT",
+          schema: "public",
+          table: "mensagens_alertas",
+      },
+
+      async (payload) => {
+
+          console.log(payload);
+
+          const alerta = payload.new;
+
+          mostrarNotificacao(alerta);
+
+      }
+
+    )
+
+    .subscribe();
+
+    function mostrarNotificacao(alerta){
+
+   if(Notification.permission !== "granted"){
+      return;
+   }
+
+   navigator.serviceWorker.ready
+   .then(registration => {
+
+      registration.showNotification(
+
+         "🚨 Novo Alerta",
+
+         {
+            body:
+            `Rua: ${alerta.id_rua}`,
+
+            icon: "/icon.png",
+
+            vibrate: [200,100,200],
+
+            tag: "novo-alerta",
+
+            data: {
+               url:
+               `/dashboard/lapa1`
+            }
+
+         }
+
+      );
+
+   });
+
+}
+
+   
 
     const usuario = JSON.parse(
       localStorage.getItem("usuarioLogado")
@@ -559,6 +622,53 @@
       alert("Atendimento salvo!");
 
       fecharModalAtendimento();
+
+    }
+
+    async function pedirPermissaoNotificacao(){
+
+      const permissao =
+      await Notification.requestPermission();
+
+      console.log(permissao);
+
+      if(permissao === "granted"){
+
+          alert("Notificações ativadas!");
+
+      }
+
+    }
+
+    function notificacaoTeste(){
+
+        if(Notification.permission !== "granted"){
+
+            alert("Permissão negada");
+
+            return;
+
+        }
+
+        navigator.serviceWorker.ready.then(registration => {
+
+            registration.showNotification(
+              "🚨 Novo Alerta",
+              {
+                  body: "Rua Central acionou atendimento.",
+                  icon: "/icon.png",
+                  badge: "/icon.png",
+
+                  vibrate: [200, 100, 200],
+
+                  data: {
+                    url: "/dashboard/lapa1"
+                  }
+
+              }
+            );
+
+        });
 
     }
 
