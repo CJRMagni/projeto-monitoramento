@@ -5,6 +5,9 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="/js/config/supabase.js"></script>
 
   <title>Configurações</title>
 
@@ -15,8 +18,12 @@
 
 <body>
 
+
+
 <!-- TOPO -->
 <div class="topbar">
+
+ 
 
   <button id="menuBtn" class="menu-btn">
     ☰
@@ -62,7 +69,7 @@
 <!-- CONTEÚDO -->
 <div class="page-content">
 
- <!-- MANUAL OPERACIONAL -->
+   <!-- MANUAL OPERACIONAL -->
 <div class="manual-card">
 
   <button 
@@ -163,6 +170,179 @@
       05/08/2026 • Versão 1.0
 
     </div>
+
+  </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- RUAS CADASTRADAS -->
+<!-- ========================= -->
+
+<div class="manual-card">
+
+  <button 
+    class="manual-btn"
+    onclick="toggleRuas()"
+  >
+    🛣 Ruas Cadastradas
+    <span id="ruasIcon">▼</span>
+  </button>
+
+    <div class="modalQR" id="modalQR">
+      <div class="conteudoQR">
+
+          <span class="fechar" onclick="fecharQR()">
+            ✖
+          </span>
+
+          <canvas id="canvasQR"></canvas>
+
+      </div>
+    </div>
+
+  <div id="ruasContent" class="manual-content">
+
+    <!-- TOPO -->
+    <div class="ruas-header">
+
+      <h3>
+        Lista de Ruas
+      </h3>
+
+      <button 
+        class="btn-nova-rua"
+        onclick="abrirModalRua()"
+      >
+        + Nova Rua
+      </button>
+
+    </div>
+
+    <!-- TABELA -->
+    <div class="table-wrap">
+
+      <table class="ruas-table">
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+
+            <th>Nome</th>
+
+            <th>Slug</th>
+
+            <th>Responsável</th>
+
+            <th>Status</th>
+
+            <th>Conjunto</th>
+
+            <th>Qr Code</th>
+
+            <th>Editar</th>
+
+            <th>Excluir</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="tbodyRuas">
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- MODAL RUA -->
+<!-- ========================= -->
+
+<div id="modalRua" class="modal-rua">
+
+  <div class="modal-rua-content">
+
+    <div class="modal-header">
+
+      <h2 id="tituloModalRua">
+        Nova Rua
+      </h2>
+
+      <button 
+        class="btn-close"
+        onclick="fecharModalRua()"
+      >
+        ✖
+      </button>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Nome da Rua</label>
+
+      <input 
+        title="Nome, Numero"
+        type="text"
+        id="inputNomeRua"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Responsável</label>
+
+      <input 
+        type="text"
+        id="inputResponsavelRua"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Conjunto</label>
+
+      <input 
+        type="text"
+        id="inputConjuntoRua"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Status</label>
+
+      <select id="inputStatusRua">
+
+        <option value="ATIVO">
+          Ativa
+        </option>
+
+        <option value="INATIVO">
+          Inativa
+        </option>
+
+      </select>
+
+    </div>
+
+    <button 
+      class="btn-salvar-rua"
+      onclick="salvarRua()"
+    >
+      Salvar
+    </button>
 
   </div>
 
