@@ -196,19 +196,26 @@
 
   <script>
 
-    if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator) {
 
-      navigator.serviceWorker
-      .register('/sw.js')
+    navigator.serviceWorker
+    .register('/sw.js')
 
-      .then(() => {
-          console.log('Service Worker registrado')
-           pedirPermissaoNotificacao();
-      })
+    .then((reg) => {
 
-    }
+        console.log("SW registrado", reg);
 
-    </script>
+    })
+
+    .catch((err) => {
+
+        console.log("Erro SW", err);
+
+    });
+
+  }
+
+  </script>
 
 </body>
 </html>

@@ -45,7 +45,7 @@
 
       async (payload) => {
 
-          console.log(payload);
+          console.log("payload", payload);
 
           const alerta = payload.new;
 
@@ -58,6 +58,8 @@
     .subscribe();
 
     function mostrarNotificacao(alerta){
+
+    console.log("Mostrando notificação para alerta:", alerta);
 
    if(Notification.permission !== "granted"){
       return;
@@ -73,8 +75,6 @@
          {
             body:
             `Rua: ${alerta.id_rua}`,
-
-            icon: "/icon.png",
 
             vibrate: [200,100,200],
 
