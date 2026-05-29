@@ -53,6 +53,17 @@ app.get('/historico', (req, res) => {
 
 })
 
+// mapa
+app.get('/mapa/:conjunto', (req, res) => {
+
+    console.log("MAPA OK")
+
+   res.sendFile(
+      path.join(__dirname, 'public', 'mapa.html')
+   )
+
+})
+
 
 
 // DASHBOARD

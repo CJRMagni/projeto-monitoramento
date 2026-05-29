@@ -167,27 +167,38 @@ function toggleRuas(){
             </td>
 
             <td>
-               <button class="btn-qr" onclick="abrirQRCode('${rua.slug}')">
-                  <i class="bi bi-qr-code"></i> Abrir
+               ${rua.lat || "-"}
+            </td>
+
+            <td>
+               ${rua.long || "-"}
+            </td>
+
+            <td>
+               <button 
+                  class="btn-action btn-qr"
+                  onclick="abrirQRCode('${rua.slug}', '${rua.nome}')"
+               >
+                  QR Code
                </button>
             </td>
 
             <td>
-
                <button
-                  class="btn-action"
+                  class="btn-action btn-edit"
                   onclick='editarRua(${JSON.stringify(rua)})'
                >
-                  ✏
+                  Editar
                </button>
+            </td>
 
+            <td>
                <button
-                  class="btn-action"
+                  class="btn-action btn-delete"
                   onclick="excluirRua(${rua.id})"
                >
-                  🗑
+                  Excluir
                </button>
-
             </td>
 
          </tr>
@@ -198,28 +209,57 @@ function toggleRuas(){
 
 }
 
-function abrirQRCode(slug){
+async function abrirQRCode(idRua, nomeRua){
 
-   let link = `https://projeto-monitoramento-one.vercel.app/painel-cliente/${slug}`
+   let link = `https://projeto-monitoramento-one.vercel.app/painel-cliente/${idRua}`
 
    document.getElementById("modalQR").style.display = "flex"
 
-   QRCode.toCanvas(
-      document.getElementById("canvasQR"),
+   document.getElementById("nomeRuaQR").innerHTML = nomeRua
+
+   let canvas = document.getElementById("canvasQR")
+
+   let ctx = canvas.getContext("2d")
+   ctx.clearRect(0,0,canvas.width,canvas.height)
+
+   await QRCode.toCanvas(
+      canvas,
       link,
       {
-         width: 300
+         width: 300,
+         margin: 2
       }
    )
 }
 
 function fecharQR(){
+
    document.getElementById("modalQR").style.display = "none"
 
    let canvas = document.getElementById("canvasQR")
+
    let ctx = canvas.getContext("2d")
 
    ctx.clearRect(0,0,canvas.width,canvas.height)
+}
+
+async function baixarQRCodePNG(){
+
+   let area = document.getElementById("areaQRCode")
+
+   let canvas = await html2canvas(area)
+
+   let link = document.createElement("a")
+
+   let nomeRua = document
+      .getElementById("nomeRuaQR")
+      .innerText
+
+   link.download = `QR_${nomeRua}.png`
+
+   link.href = canvas.toDataURL("image/png")
+
+   link.click()
 }
 
 // =========================
@@ -280,6 +320,13 @@ function editarRua(rua){
    .getElementById("inputNomeRua")
    .value = rua.nome || "";
 
+   document
+   .getElementById("inputLatRua")
+   .value = rua.lat || "";
+
+   document
+   .getElementById("inputLongRua")
+   .value = rua.long || "";
 
    document
    .getElementById("inputResponsavelRua")
@@ -323,6 +370,12 @@ async function salvarRua(){
    const status =
    document.getElementById("inputStatusRua").value;
 
+   const lat =
+   document.getElementById("inputLatRua").value;
+
+   const long =
+   document.getElementById("inputLongRua").value;
+
    if(!nome){
 
       alert("Digite a rua");
@@ -339,7 +392,9 @@ async function salvarRua(){
          slug,
          responsavel,
          conjunto,
-         status
+         status,
+         lat,
+         long
       })
       .eq("id", ruaEditando);
 
@@ -352,7 +407,8 @@ async function salvarRua(){
          slug,
          responsavel,
          conjunto,
-         status
+         status,lat,
+         long
       });
 
    }

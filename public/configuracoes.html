@@ -7,6 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <!-- html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="/js/config/supabase.js"></script>
 
   <title>Configurações</title>
@@ -44,6 +46,10 @@
 
   <a href="/dashboard/lapa1">
     🏠 Dashboard
+  </a>
+
+  <a href="/mapa">
+    📍 Mapa
   </a>
 
   <a href="/historico">
@@ -190,16 +196,34 @@
   </button>
 
     <div class="modalQR" id="modalQR">
-      <div class="conteudoQR">
 
-          <span class="fechar" onclick="fecharQR()">
-            ✖
-          </span>
+   <div class="conteudoQR">
 
-          <canvas id="canvasQR"></canvas>
+      <span class="fechar" onclick="fecharQR()">
+         ✖
+      </span>
+
+      <div id="areaQRCode">
+
+         <div class="empresaNome">
+            Kallimage Comércio de Equipamentos
+         </div>
+
+         <canvas id="canvasQR"></canvas>
+
+         <div class="nomeRua" id="nomeRuaQR">
+            
+         </div>
 
       </div>
-    </div>
+
+      <button class="btnDownload" onclick="baixarQRCodePNG()">
+         Baixar PNG
+      </button>
+
+   </div>
+
+</div>
 
   <div id="ruasContent" class="manual-content">
 
@@ -239,6 +263,10 @@
             <th>Status</th>
 
             <th>Conjunto</th>
+
+            <th>Latitude</th>
+
+            <th>Longitude</th>
 
             <th>Qr Code</th>
 
@@ -318,6 +346,30 @@
       >
 
     </div>
+
+    <div class="form-group">
+
+      <label>Latitude</label>
+
+      <input 
+        type="text"
+        id="inputLatRua"
+      >
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label>Longitude</label>
+
+      <input 
+        type="text"
+        id="inputLongRua"
+      >
+
+    </div>
+
 
     <div class="form-group">
 

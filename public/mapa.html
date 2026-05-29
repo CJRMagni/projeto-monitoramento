@@ -4,13 +4,22 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script src="/js/config/supabase.js"></script>
 <link rel="manifest" href="/manifest.json">
+<link 
+  rel="stylesheet" 
+  href="https://unpkg.com/leaflet/dist/leaflet.css"
+/>
 
-<script src='https://8x8.vc/vpaas-magic-cookie-99e1f2c24e7b4ec9a7a157ab0126c6b8/external_api.js' async></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script
+  src="https://8x8.vc/vpaas-magic-cookie-99e1f2c24e7b4ec9a7a157ab0126c6b8/external_api.js"
+  onload="jitsiPronto()"
+></script>
 <head>
   <meta charset="UTF-8">
   <title>Painel de Alertas</title>
 
-  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/mapa.css">
 
 </head>
 <body>
@@ -38,10 +47,6 @@
     🏠 Dashboard
   </a>
 
-  <a href="/mapa">
-    📍 Mapa
-  </a>
-
   <a href="/historico">
     📜 Histórico
   </a>
@@ -60,7 +65,23 @@
 
 </div>
 
-<!-- OVERLAY -->
+<!-- OVERLAY
+
+  <button onclick="btnGravarTela()" id="btnGravarTela" style="
+    position: fixed;
+    top: 10px;
+    right: 150px;
+    padding: 10px;
+    background: #e21111;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    z-index: 999999;
+  ">
+  🔊 Gravar Tela
+  </button> -->
+
 <div id="overlay" class="overlay"></div>
 
   <button id="btnAtivarSom" style="
@@ -77,23 +98,51 @@
   🔊 Ativar Som
   </button>
 
+
+
 <!--  <button id="btnGravar" class="gravar-btn">🔴 Gravar Tela</button>
   <button id="btnParar" class="parar-btn" style="display:none;">⏹ Parar</button> -->
 
 <!-- GRID PRINCIPAL -->
-<div class="app-container">
+<div class="map-container">
 
-  <!-- COLUNA DOS CARDS (ESQUERDA) -->
-  <div class="cards-column" id="cardsColumn">
-    
+   <div id="map"></div>
+
+</div>
+
+
+
+<!-- ========================= -->
+<!-- POPUPS ALERTAS -->
+<!-- ========================= -->
+
+<div id="alertsContainer"
+     class="alerts-container">
+
+</div>
+
+ <!-- COLUNA DO VÍDEO (DIREITA) -->
+<!-- JANELA FLUTUANTE -->
+<div class="video-window" id="videoWindow">
+
+  <div class="video-header" id="videoHeader">
+
+    <span>📹 Atendimento em Vídeo</span>
+
+    <div class="video-actions">
+
+      <button onclick="minimizarVideo()">➖</button>
+
+      <button onclick="fecharVideo()">✖</button>
+
+    </div>
 
   </div>
 
-  <!-- COLUNA DO VÍDEO (DIREITA) -->
-  <div class="video-column">
-    <div class="video-preview" style="display:none;" id="previewWrap">
-      <div id="jaas-container"></div>
-    </div>
+  <div id="previewWrap" class="video-body">
+
+    <div id="jaas-container"></div>
+
   </div>
 
 </div>
@@ -105,7 +154,7 @@
 
     <div class="modal-header">
 
-      <h2>Registro de Atendimento</h2>
+      <h2 id="texto-registro">Registro de Atendimento</h2>
 
       <button 
         class="btn-close"
@@ -195,30 +244,28 @@
 
 </div>
 
-  <script src="/js/dashboard.js"></script>
 
-  <script>
+<!-- JANELA FLUTUANTE -->
+<div id="cameraWindow" class="camera-window">
 
-  if ('serviceWorker' in navigator) {
+  <div id="cameraHeader" class="camera-header">
 
-    navigator.serviceWorker
-    .register('/sw.js')
+    <span>📹 Câmera Ao Vivo</span>
 
-    .then((reg) => {
+    <button onclick="fecharCamera()">
+      ✖
+    </button>
 
-        console.log("SW registrado", reg);
+  </div>
 
-    })
+  <div class="camera-body" id="cameraBody">
 
-    .catch((err) => {
+  </div>
 
-        console.log("Erro SW", err);
+</div>
 
-    });
 
-  }
-
-  </script>
+  <script src="/js/mapa.js"></script>
 
 </body>
 </html>

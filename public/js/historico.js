@@ -30,6 +30,8 @@
 
 verificarLogin();
 
+let alertaAtual = null;
+
 window.addEventListener("DOMContentLoaded", () => {
 
       console.log("Dashboard carregado");
@@ -149,6 +151,15 @@ async function carregarHistorico(){
 
             <td>${item.conexao || "-"}</td>
 
+             <td>
+               <button 
+                  class="btn-action btn-qr"
+                  onclick="abrirFormularioAtendimento('${item.id}', '${item.id_rua}')"
+               >
+                  Anotar Atendimento
+               </button>
+            </td>
+
          </tr>
          <tr
             id="detalhes-${item.id}"
@@ -168,6 +179,276 @@ async function carregarHistorico(){
    }
 
 }
+
+const mensagens = []
+
+async function carregarMensagens(){
+
+   const { data, error } = await supabaseGet
+      .from("mensagens")
+      .select(`
+         id,
+         created_at,
+         rua_nome,
+         nome,
+         email,
+         assunto,
+         mensagem,
+         status,
+         anexos
+      `)
+      .order("id", { ascending: false })
+
+   if(error){
+
+      console.log(error)
+      return
+
+   }
+
+   console.log(data)
+
+   const tbody = document.getElementById("tbodyMensagens")
+
+   tbody.innerHTML = ""
+
+   for (const item of data) {
+
+      mensagens.push(item);
+
+      const dataFormatada = new Date(item.created_at)
+      .toLocaleString("pt-BR")
+
+
+      tbody.innerHTML += `
+
+         <tr>
+           
+           <td>
+
+                <button onclick="toggleDetalhes('${item.id}')">
+                    ▶
+                </button>
+
+            </td>
+
+            <td>${item.id}</td>
+
+            <td>${dataFormatada}</td>
+
+            <td>${item.rua_nome || "-"}</td>
+
+            <td>${item.nome || "-"}</td>
+
+            <td>${item.email || "-"}</td>
+
+            <td>${item.assunto || "-"}</td>
+
+            <td>${item.mensagem || "-"}</td>
+
+            <td>${item.status || "-"}</td>
+
+             <td>
+               <button 
+                  class="btn-action btn-qr"
+                  onclick="abrirAnexos('${item.id}')"
+               >
+                  Abrir Anexos
+               </button>
+            </td>
+
+         </tr>
+      `
+
+   }
+
+}
+
+async function abrirAnexos(id){
+
+    const mensagem = mensagens.find(m => m.id == id);
+
+    const anexos = mensagem.anexos || [];
+
+    const container = document.getElementById("containerAnexos");
+
+    container.innerHTML = "";
+
+    for(const anexo of anexos){
+
+        const { data } = supabaseGet.storage
+            .from("mensagens")
+            .getPublicUrl(anexo.caminho);
+
+        const url = data.publicUrl;
+
+        container.innerHTML += `
+
+            <div class="anexo-card">
+
+                <h4>${anexo.nome}</h4>
+
+                ${
+                    anexo.tipo.includes("pdf")
+                    ?
+                    `<iframe
+                        src="${url}"
+                        width="100%"
+                        height="600"
+                        style="border:1px solid #ccc;border-radius:8px;">
+                    </iframe>`
+                    :
+                    `<img
+                        src="${url}"
+                        style="
+                            width:100%;
+                            max-height:800px;
+                            object-fit:contain;
+                            border-radius:8px;
+                        "
+                    >`
+                }
+
+            </div>
+
+        `;
+
+    }
+
+    document.getElementById("modalAnexos").showModal();
+
+}
+
+function trocarPreview(url){
+
+    document.getElementById("previewAnexo").src = url;
+
+}
+
+function toggleHistorico(){
+
+   const content =
+   document.getElementById("hstoricoContent");
+
+   const icon =
+   document.getElementById("ruasIcon");
+
+   content.classList.toggle("active");
+
+   if(content.classList.contains("active")){
+
+      icon.innerText = "▲";
+
+      carregarHistorico()
+
+   } else {
+
+      icon.innerText = "▼";
+
+   }
+
+}
+
+function toggleMensagens(){
+
+   const content =
+   document.getElementById("mensagensContent");
+
+   const icon =
+   document.getElementById("ruasIcon");
+
+   content.classList.toggle("active");
+
+   if(content.classList.contains("active")){
+
+      icon.innerText = "▲";
+
+      carregarMensagens()
+
+   } else {
+
+      icon.innerText = "▼";
+
+   }
+
+}
+
+function abrirFormularioAtendimento(idMensagem, idRua){
+
+   alertaAtual = { idAlerta: idMensagem, idRua: idRua };
+
+   document.getElementById("texto-registro").textContent = "Registro de Atendimento - ID: " + idMensagem;
+
+      document
+      .getElementById("modalAtendimento")
+      .classList.add("active");
+   
+
+}
+
+// salvar atendimento
+    async function salvarAtendimento(){
+
+      const status =
+      document.getElementById("statusAtendimento").value;
+
+      const prioridade =
+      document.getElementById("prioridadeAtendimento").value;
+
+      const suporteExterno =
+      document.getElementById("suporteExterno").value;
+
+      const observacoes =
+      document.getElementById("observacoesAtendimento").value;
+
+      const usuario = JSON.parse(
+          localStorage.getItem("usuarioDados")
+      );
+
+      const { data, error } = await supabaseGet
+          .from("atendimentos")
+          .insert({
+
+            id_alerta: alertaAtual?.idAlerta || null,
+
+            id_rua: alertaAtual?.idRua || null,
+
+            operador: usuario?.email || "OPERADOR",
+
+            status,
+
+            prioridade,
+
+            suporte_externo: suporteExterno,
+
+            observacoes
+
+          });
+
+      if(error){
+
+          console.log(error);
+
+          alert("Erro ao salvar");
+
+          return;
+
+      }
+
+      alert("Atendimento salvo!");
+
+      fecharModalAtendimento();
+
+    }
+
+// fecha modal
+   function fecharModalAtendimento(){
+
+   document
+         .getElementById("modalAtendimento")
+         .classList.remove("active");
+
+   }
 
 function toggleDetalhes(id){
 
@@ -197,6 +478,3 @@ async function buscarAtendimentos(idAlerta){
    return data;
 }
 
-
-
-carregarHistorico()

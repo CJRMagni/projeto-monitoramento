@@ -135,7 +135,7 @@
 
       const slug = window.location.pathname.split('/').pop()
 
-      //console.log("slug", slug)
+      console.log("slug", slug)
 
       const { data, error } = await supabaseGet
           .from('ruas')

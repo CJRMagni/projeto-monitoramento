@@ -1,6 +1,8 @@
 
   const rua = window.location.pathname.split('/').pop()
 
+  document.getElementById("rualocal").textContent = "📍RUA: " + rua.replace(/-/g, ' ').toLocaleUpperCase()
+
   console.log("rua", rua)
 
   window.onload = function() {
@@ -227,6 +229,126 @@
         
       }
 
+      async function enviarMensagemChamado(btnID){
+
+        const btn = document.getElementById(btnID);
+
+        btn.disabled = true;
+        btn.innerHTML = `
+          <span class="spinner-border spinner-border-sm"></span>
+          Enviando...
+        `;
+
+        const nomeMensagem = document.getElementById('nomeMensagem').value;
+        const emailMensagem = document.getElementById('emailMensagem').value;
+        const assuntoMensagem = document.getElementById('assuntoMensagem').value;
+        const textoMensagem = document.getElementById('textoMensagem').value;
+
+        // inserir no supabase
+        try {
+          const { data, error } = await supabaseGet
+          .from("mensagens")
+          .insert({
+            rua_slug: rua,
+            rua_nome: "ruaNome",
+            nome: nomeMensagem,
+            email: emailMensagem,
+            assunto: assuntoMensagem,
+            mensagem: textoMensagem
+          })
+          .select()
+          .single();
+
+          if (error) console.error(error)
+          else console.log("retorno salvo:", data);
+          const idMensagem = data.id;
+          await salvarAnexosMensagem(idMensagem)
+        } catch(e){ console.error("erro enviar", e); }
+
+        if(btnID == "btnVideo"){
+          abrirChamadaDeVideo()
+        }
+        
+      }
+
+      async function salvarAnexosMensagem(idMensagem){
+        const anexos = [];
+        const arquivos =
+        document.getElementById(
+          "anexosMensagem"
+        ).files;
+
+        if(arquivos.length > 0){
+
+          for(const arquivo of arquivos){
+
+              const caminho =
+              `${idMensagem}/${Date.now()}_${arquivo.name}`;
+
+              const { error } =
+              await supabaseGet.storage
+              .from("mensagens")
+              .upload(
+                caminho,
+                arquivo
+              );
+
+              if(!error){
+
+                anexos.push({
+
+                    nome: arquivo.name,
+
+                    caminho: caminho,
+
+                    tipo: arquivo.type,
+
+                    tamanho: arquivo.size
+
+                });
+
+              } else {
+           
+                alert("Erro ao enviar arquivo: " + error.message);
+                console.error("Erro ao enviar arquivo:", error);
+                return
+              }
+
+          }
+
+          const { error } = await supabaseGet
+            .from('mensagens')
+            .update({
+              anexos: anexos
+            })
+            .eq('id', idMensagem);
+
+            
+
+        }
+        
+        const btn = document.getElementById('btnEnviarMensagem');
+        btn.disabled = false;
+
+            btn.innerHTML = `
+              <i class="bi bi-send"></i>
+              Enviar
+            `;
+
+         limparCamposMensagem()   
+
+      }
+
+      function limparCamposMensagem(){
+        document.getElementById('nomeMensagem').value = "";
+        document.getElementById('emailMensagem').value = "";
+        document.getElementById('assuntoMensagem').value = "";
+        document.getElementById('textoMensagem').value = "";
+        document.getElementById('anexosMensagem').value = "";
+        fecharModalMensagem()
+        alert("Mensagem enviada com sucesso!");
+      }
+
       function detectarMarca(userAgent) {
         const ua = userAgent.toLowerCase();
 
@@ -273,5 +395,30 @@
         });
 
       }
+
+      function abrirModalMensagem(){
+
+        document
+            .getElementById("modalMensagem")
+            .style.display = "flex";
+
+      }
+
+      function fecharModalMensagem(){
+
+        document
+            .getElementById("modalMensagem")
+            .style.display = "none";
+
+      }
+
+      document
+        .getElementById("btnMensagem")
+        .addEventListener(
+          "click",
+          abrirModalMensagem
+        );
+
+ 
 
 

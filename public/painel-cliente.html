@@ -36,6 +36,30 @@
         Verificando disponibilidade...
       </div>
 
+      <div id="rualocal" style="
+          width:90%;
+
+          padding:10px 15px;
+
+          margin-bottom:18px;
+
+          border-radius:14px;
+
+          background:linear-gradient(90deg,#2563eb,#1d4ed8);
+
+          color:white;
+
+          font-size:14px;
+          font-weight:500;
+
+          display:flex;
+          align-items:center;
+
+          box-shadow:0 6px 20px rgba(37,99,235,.35);
+        ">
+          📍 VOCÊ ESTÁ EM: RUA ESPERANÇA
+        </div>
+
       <section class="buttons" style="margin-top:18px">
         <button id="btnVideo" class="btn" aria-label="Chamada por vídeo">
           <div class="icon">
@@ -66,6 +90,16 @@
             <div class="hint">Abre conversa com mensagem pronta</div>
           </div>
         </button>
+
+        <button id="btnMensagem" class="btn" aria-label="Enviar Mensagem">
+          <div class="icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20.5 3.5A11.9 11.9 0 0 0 12 1C6 1 1.5 5.5 1.5 11.5c0 2 .6 3.9 1.7 5.5L1 23l6-1.6a10.9 10.9 0 0 0 5 1.1c6 0 10.5-4.5 10.5-10.5 0-3-1.2-5.8-3.5-7.5z" fill="currentColor"/></svg>
+          </div>
+          <div class="label">
+            <div style="font-weight:600">Enviar Mensagem</div>
+            <div class="hint">Deixe sua solicitação aqui</div>
+          </div>
+        </button>
       </section>
 
       <div class="video-preview" id="previewWrap">
@@ -78,6 +112,103 @@
       </footer>
     </main>
   </div>
+
+  <div id="modalMensagem" class="modal-mensagem">
+
+  <div class="modal-mensagem-content">
+
+    <div class="modal-mensagem-header">
+
+      <h2>📋 Registrar Ocorrência</h2>
+
+      <button
+        class="btn-close"
+        onclick="fecharModalMensagem()"
+      >
+        ✖
+      </button>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Nome</label>
+
+      <input
+        type="text"
+        id="nomeMensagem"
+        placeholder="Digite seu nome"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>E-mail</label>
+
+      <input
+        type="email"
+        id="emailMensagem"
+        placeholder="Digite seu e-mail"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Assunto</label>
+
+      <input
+        type="text"
+        id="assuntoMensagem"
+        placeholder="Informe o assunto"
+      >
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Mensagem</label>
+
+      <textarea
+        id="textoMensagem"
+        rows="6"
+        placeholder="Descreva a ocorrência"
+      ></textarea>
+
+    </div>
+
+    <div class="form-group">
+
+      <label>Anexos</label>
+
+      <input
+        type="file"
+        id="anexosMensagem"
+        multiple
+        accept="image/*,video/*,.pdf"
+      >
+
+      <div
+        id="listaArquivos"
+        class="lista-arquivos"
+      ></div>
+
+    </div>
+   
+    <div id="statusUpload"></div>
+    
+    <button
+      id="btnEnviarMensagem"
+      class="btn-enviar-mensagem"
+      onclick="enviarMensagemChamado(this.id)"
+    >
+      Enviar Ocorrência
+    </button>
+
+  </div>
+
+</div>
 
    <script src="/js/painel-cliente.js"></script>
 
