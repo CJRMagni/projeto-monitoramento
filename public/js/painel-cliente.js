@@ -274,9 +274,16 @@
 
       async function enviarMensagem(btnID, latlong){
 
+          const pegarRua = await buscarlatlngRua(rua)
+
         // vamos calcular a distancia entre ele o o local do chamado, para enviar essa informação para o atendente
 
-          const d = await calcularDistancia("-23.61539021554712", "-46.637918972017246", latlong.lat, latlong.lng);
+           if(!pegarRua) {
+              alert("Não foi possível identificar o local do chamado. Verifique se a rua está correta.");
+              return false;
+           }
+
+          const d = await calcularDistancia(pegarRua[0].lat, pegarRua[0].long, latlong.lat, latlong.lng);
 
           console.log("Distancia do usuário ao local do chamado:", d, "metros");
 
@@ -527,6 +534,25 @@
           // message
           alert("Chamada finalizada!");
         });
+
+      }
+
+       async function buscarlatlngRua(slug){
+
+        // busca mensagens ativas para a rua
+
+        const { data, error } = await supabaseGet
+            .from('ruas')
+            .select('*')
+            .eq('slug', slug)
+            .eq('status', 'ATIVO')
+
+          if(error){
+              console.log(error)
+              return
+            }
+
+            return data;
 
       }
 
