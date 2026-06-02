@@ -7,8 +7,6 @@ const app = express()
 
 app.use(express.json())
 
-
-
 console.log("AAAAAAAAAAAA INDEX CERTO")
 
 // TESTE
@@ -30,6 +28,32 @@ app.get('/login', (req, res) => {
    )
 
 })
+
+// cadastro 
+app.get('/cadastro', (req, res) => {
+
+   res.sendFile(
+      path.join(
+         __dirname,
+         'public',
+         'cadastro.html'
+      )
+   );
+
+});
+
+// cadastro 
+app.get('/usuarios', (req, res) => {
+
+   res.sendFile(
+      path.join(
+         __dirname,
+         'public',
+         'usuarios.html'
+      )
+   );
+
+});
 
 // configuracoes
 app.get('/configuracoes', (req, res) => {
@@ -63,6 +87,7 @@ app.get('/mapa/:conjunto', (req, res) => {
    )
 
 })
+
 
 
 

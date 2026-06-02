@@ -30,6 +30,31 @@
 
 verificarLogin();
 
+// validar acesso
+async function validarAcesso(){
+
+   const { data: auth } =
+   await supabaseGet.auth.getUser();
+
+   if(!auth.user){
+
+      window.location.href = "/login";
+
+      return;
+
+   }
+
+   const { data: usuario } =
+   await supabaseGet
+   .from("usuarios")
+   .select("perfil")
+   .eq("id", auth.user.id)
+   .single();
+
+   return usuario;
+
+}
+
 let alertaAtual = null;
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -184,6 +209,8 @@ const mensagens = []
 
 async function carregarMensagens(){
 
+   const perfil = await validarAcesso();
+
    const { data, error } = await supabaseGet
       .from("mensagens")
       .select(`
@@ -246,7 +273,50 @@ async function carregarMensagens(){
 
             <td>${item.mensagem || "-"}</td>
 
-            <td>${item.status || "-"}</td>
+            ${
+               
+               perfil.perfil == "ADMIN"
+               ? `
+
+                  <td class="status-select status-${item.status}">
+
+                  <select
+                     onchange="alterarStatus(${item.id}, this.value)"
+                  >
+
+                     <option
+                        value="ABERTO"
+                        ${item.status == "ABERTO" ? "selected" : ""}
+                     >
+                        ABERTO
+                     </option>
+
+                     <option
+                        value="PENDENTE"
+                        ${item.status == "PENDENTE" ? "selected" : ""}
+                     >
+                        PENDENTE
+                     </option>
+
+                     <option
+                        value="FECHADO"
+                        ${item.status == "FECHADO" ? "selected" : ""}
+                     >
+                        FECHADO
+                     </option>
+
+                  </select>
+
+               </td>
+
+               
+               ` :
+
+                 ` <td class="status-select status-${item.status}">${item.status || "-"}</td> `
+            
+            }
+
+            
 
              <td>
                <button 
@@ -261,6 +331,36 @@ async function carregarMensagens(){
       `
 
    }
+
+}
+
+async function alterarStatus(idMensagem, novoStatus){
+
+   console.log(
+      idMensagem,
+      novoStatus
+   );
+
+   const { error } = await supabaseGet
+   .from("mensagens")
+   .update({
+      status: novoStatus
+   })
+   .eq("id", idMensagem);
+
+   if(error){
+
+      console.log(error);
+
+      alert(
+         "Erro ao alterar status"
+      );
+
+      return;
+
+   }
+
+   alert(`Mensagem ${idMensagem} atualizada para ${novoStatus}`);
 
 }
 
@@ -293,7 +393,7 @@ async function abrirAnexos(id){
                     ?
                     `<iframe
                         src="${url}"
-                        width="100%"
+                        width="40%"
                         height="600"
                         style="border:1px solid #ccc;border-radius:8px;">
                     </iframe>`
@@ -301,7 +401,7 @@ async function abrirAnexos(id){
                     `<img
                         src="${url}"
                         style="
-                            width:100%;
+                            width:40%;
                             max-height:800px;
                             object-fit:contain;
                             border-radius:8px;
@@ -331,7 +431,7 @@ function toggleHistorico(){
    document.getElementById("hstoricoContent");
 
    const icon =
-   document.getElementById("ruasIcon");
+   document.getElementById("ruasIconAlertas");
 
    content.classList.toggle("active");
 
@@ -355,7 +455,7 @@ function toggleMensagens(){
    document.getElementById("mensagensContent");
 
    const icon =
-   document.getElementById("ruasIcon");
+   document.getElementById("ruasIconMensagens");
 
    content.classList.toggle("active");
 

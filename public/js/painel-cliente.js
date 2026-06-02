@@ -1,12 +1,80 @@
 
   const rua = window.location.pathname.split('/').pop()
 
-  document.getElementById("rualocal").textContent = "📍RUA: " + rua.replace(/-/g, ' ').toLocaleUpperCase()
+  let latitude = null;
+  let longitude = null;
 
-  console.log("rua", rua)
+  const ruaNome = rua
+                  .replace(/-/g, ' ')
+                  .replace(/(\D)(\d+)/, '$1 $2')
+                  .toUpperCase();
+
+  document.getElementById("rualocal").textContent = "📍RUA: " + ruaNome
+
+
+  /*window.addEventListener(
+    "load",
+    solicitarLocalizacao
+  );*/
+
+  async function solicitarLocalizacao(){
+
+   const confirmarLocal =
+   await alertaGlobal(
+
+      "Gostaria de compartilhar sua localização para facilitar o atendimento?",
+
+      [
+         {
+            texto:"OK",
+            cor:"#198754"
+         }
+      ],
+
+      "sucesso"
+
+   );
+
+   if(!confirmarLocal){
+
+      return null;
+
+   }
+
+   return new Promise(
+
+      (resolve, reject)=>{
+
+         navigator.geolocation.getCurrentPosition(
+
+            (posicao)=>{
+
+               resolve({
+
+                  lat: posicao.coords.latitude,
+
+                  lng: posicao.coords.longitude
+
+               });
+
+            },
+
+            (erro)=>{
+
+               reject(erro);
+
+            }
+
+         );
+
+      }
+
+   );
+
+}
+    
 
   window.onload = function() {
-
 
     // === CONFIGURAÇÕES ===
     var VIDEO_MEETING_URL = 'https://meet.jit.si/' + rua;
@@ -53,7 +121,8 @@
     }
 
     // 6️⃣ Eventos dos botões
-    btnVideo.addEventListener('click', function() {
+    btnVideo.addEventListener('click', async function() {
+      const latlong = await solicitarLocalizacao();
       navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         .then(function(stream) {
           //localVideo.srcObject = stream;
@@ -62,23 +131,26 @@
         .catch(function() {
           alert('Não foi possível acessar a câmera. Verifique permissões.');
         });
-      enviarMensagem("btnVideo")
+      enviarMensagem("btnVideo", latlong)
       //window.open(VIDEO_MEETING_URL, '_blank');
     });
 
-    btnPhone.addEventListener('click', function() {
-      enviarMensagem("btnPhone")
+    btnPhone.addEventListener('click', async function() {
+       const latlong = await solicitarLocalizacao();
+      enviarMensagem("btnPhone", latlong)
       var tel = buildTelWithExtension(PHONE_NUMBER, EXTENSION);
       window.location.href = tel;
     });
 
-    btnWhats.addEventListener('click', function() {
-      enviarMensagem("btnWhats")
+    btnWhats.addEventListener('click', async function() {
+      const latlong = await solicitarLocalizacao();
+      enviarMensagem("btnWhats", latlong)
       var url = "https://wa.me/" + WHATS_NUMBER + "?text=" + WHATS_MESSAGE;
       window.open(url, '_blank');
     });
 
   };
+
 
 
 
@@ -193,7 +265,7 @@
 
     // quando o usuario clicar em algum dos itens, vamos enviar para o atendente....
 
-      async function enviarMensagem(btnID){
+      async function enviarMensagem(btnID, latlong){
 
         const dispositivoTipo = navigator.userAgent;
         const conexaoTipo = navigator.connection;
@@ -205,7 +277,7 @@
       //  const input = document.getElementById(`cw_input_${targetId}`);
       //  const idAnexo = document.getElementById(`file_${targetId}`).dataset.idAnexo;
 
-        console.log("enviar mensagem", btnID)
+        console.log("enviar mensagem", btnID, latlong)
 
         // inserir no supabase
         try {
@@ -216,7 +288,9 @@
               tipo_servico: btnID,
               atendente : emailAtendente,
               dispositivo: dispositivoTipo,
-              conexao: conexaoTipo
+              conexao: conexaoTipo,
+              latitude: latlong.lat,
+              longitude: latlong.lng
             });
 
           if (error) console.error(error);
@@ -250,11 +324,13 @@
           .from("mensagens")
           .insert({
             rua_slug: rua,
-            rua_nome: "ruaNome",
+            rua_nome: ruaNome,
             nome: nomeMensagem,
             email: emailMensagem,
             assunto: assuntoMensagem,
-            mensagem: textoMensagem
+            mensagem: textoMensagem,
+            latitude: latitude,
+            longitude: longitude
           })
           .select()
           .single();
@@ -396,7 +472,9 @@
 
       }
 
-      function abrirModalMensagem(){
+      async function abrirModalMensagem(){
+
+        const latlong = await solicitarLocalizacao();
 
         document
             .getElementById("modalMensagem")
@@ -419,6 +497,118 @@
           abrirModalMensagem
         );
 
- 
+        /*
 
+  1 - Confirmação (SIM / NÃO)
+
+    const resposta = alertaGlobal(
+        "Deseja EXCLUIR o Pedido 1234 ?",
+        [
+          {texto:"SIM", cor:"#198754", valor:true},
+          {texto:"NÃO", cor:"#dc3545", valor:false}
+        ],
+        "alerta"
+      );
+
+    if(resposta){
+      excluirPedido(1234);
+    }
+    
+   2 - Exemplo — Escolher opção 
+
+    const escolha = alertaGlobal(
+      "Escolha uma opção",
+      [
+        {texto:"A"},
+        {texto:"B"},
+        {texto:"C"}
+      ]
+    );
+
+    console.log(escolha);
+
+  3- Exemplo — Apenas OK  
+    
+   alertaGlobal(
+      "Pedido salvo com sucesso",
+      [
+        {texto:"OK", cor:"#198754"}
+      ],
+      "sucesso"
+    );
+
+
+    4 - Exempl - Erro
+
+    async function excluirPedido(num){
+
+      const confirmar = alertaGlobal(
+        `Deseja EXCLUIR o Pedido <b>${num}</b>?`,
+        [
+          {texto:"SIM", cor:"#dc3545", valor:true},
+          {texto:"NÃO", cor:"#6c757d", valor:false}
+        ],
+        "alerta"
+      );
+
+      if(!confirmar) return;
+
+      console.log("excluindo pedido", num);
+
+    }
+    
+  
+  */  
+
+ 
+     function alertaGlobal(mensagem, opcoes = [], tipoAlerta = "info") {
+
+      return new Promise((resolve) => {
+
+        const antigo = document.getElementById("overlayAlertaGlobal");
+        if (antigo) antigo.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "overlayAlertaGlobal";
+
+        const box = document.createElement("div");
+        box.id = "boxAlertaGlobal";
+        box.classList.add(`alerta-${tipoAlerta}`);
+
+        const msg = document.createElement("div");
+        msg.id = "mensagemAlertaGlobal";
+        msg.innerHTML = mensagem;
+
+        const botoesDiv = document.createElement("div");
+        botoesDiv.className = "botoesAlertaGlobal";
+
+        opcoes.forEach(op => {
+
+          const btn = document.createElement("button");
+          btn.innerText = op.texto;
+
+          btn.style.background = op.cor || "#0d6efd";
+          btn.style.color = "white";
+
+          btn.onclick = () => {
+
+            overlay.remove();
+
+            resolve(op.valor ?? op.texto);
+
+          };
+
+          botoesDiv.appendChild(btn);
+
+        });
+
+        box.appendChild(msg);
+        box.appendChild(botoesDiv);
+        overlay.appendChild(box);
+
+        document.body.appendChild(overlay);
+
+      });
+
+    }
 

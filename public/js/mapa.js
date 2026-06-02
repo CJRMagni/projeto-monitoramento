@@ -33,7 +33,6 @@
    let idsOnline = [];
 
 
-
    window.addEventListener("load", () => {
         setTimeout(() => {
         alert("Para receber alertas sonoros, clique em OK para habilitar o som.");
@@ -80,9 +79,13 @@
       return
    }
 
-   data.forEach((rua) => {
+   for(const rua of data){
 
       listaRuas.push(rua.slug)
+
+      // buscar as mensagens ativas para a rua
+
+      const mensagensAtivas = await buscarMensagem(rua.slug);
 
       criarPopupAlerta(rua.slug);
 
@@ -114,7 +117,8 @@
             icon: criarIcone(
                "#16a34a",
                "12",
-               rua
+               rua,
+               mensagensAtivas
             )
          }
       ).addTo(map)
@@ -142,7 +146,7 @@
 
             <div class="popup-actions">
 
-               <button
+            <!--   <button
                      onclick="abrirVideo('${rua.slug}')"
                      class="btn-video"
                >
@@ -161,7 +165,7 @@
                      class="btn-whats"
                >
                      💬 WhatsApp
-               </button>
+               </button> -->
 
                <button
                      onclick="abrirCamera('${rua.slug}')"
@@ -192,12 +196,110 @@
 
          });
 
-   })
+   }
+
+}
+
+// vamos criar um canal para ouvir a tabela de mensagens, para mostrar na tela...
+const channelMensagens = supabaseGet
+  .channel('atualizacao_mensagens')
+
+  .on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: 'mensagens'
+    },
+
+    async (payload) => {
+
+      console.log("atualizacao_mensagens", payload)
+
+      const novaMensagem = payload.new;
+
+      const mensagensAtivas = await buscarMensagem(novaMensagem.rua_slug);
+
+      const marker =
+         markersRuas[
+            novaMensagem.rua_slug
+         ];
+
+         marker.setIcon(
+
+            criarIcone("#16a34a",
+               "12",
+               {nome:novaMensagem.rua_nome}, 
+               mensagensAtivas)
+
+         );       
+
+    }
+
+  )
+
+  .subscribe();
+
+function centralizarTodasRuas(){
+
+   const bounds = [];
+
+   Object.values(markersRuas).forEach(marker => {
+
+      bounds.push([
+         marker.getLatLng().lat,
+         marker.getLatLng().lng
+      ]);
+
+   });
+
+   if(bounds.length === 0){
+      return;
+   }
+
+   if(bounds.length === 1){
+
+      map.setView(
+         bounds[0],
+         17
+      );
+
+   }else{
+
+      map.fitBounds(
+         bounds,
+         {
+            padding:[50,50]
+         }
+      );
+
+   }
 
 }
 
 
 carregarRua()
+
+ async function buscarMensagem(slug){
+
+   // busca mensagens ativas para a rua
+
+   const { data, error } = await supabaseGet
+      .from('mensagens')
+      .select('*')
+      .eq('rua_slug', slug)
+      .eq('status', 'ABERTO')
+
+    if(error){
+         console.log(error)
+         return
+      }
+
+      console.log("Mensgens Rua", slug, data)
+
+      return data;
+
+}
 
 // vamos informar o atendente o que o usuario esta fazendo...
 
@@ -424,6 +526,10 @@ carregarRua()
 
         tocarAlertaDaRua(ruaId, ativo);
       });
+
+      if(idsOnline.length === 0){
+         centralizarTodasRuas();
+      }
     }
 
     function fecharVideo(){
@@ -563,11 +669,11 @@ carregarRua()
 
     }
 
-  // ativar pop alert
+   // ativar pop alert
   
-  function ativarPopupAlerta(ruaId){
-    document.getElementById("popup-" + ruaId).classList.remove("alert-display-none");
-  }
+   function ativarPopupAlerta(ruaId){
+      document.getElementById("popup-" + ruaId).classList.remove("alert-display-none");
+   }
 
    function fecharPopupAlerta(ruaId){
       document.getElementById("popup-" + ruaId).classList.add("alert-display-none");
@@ -698,9 +804,17 @@ function criarPopupAlerta(ruaId){
        const body =
       document.getElementById("cameraBody");
 
-      body.innerHTML = `
-         <img src="${'blob:http://200.144.30.103:8084/d7de0266-1059-4510-8c84-ec92358ee03b'}">
+       body.innerHTML = `
+         <iframe src="http://192.168.15.55/ISAPI/Streaming/Channels/101/httpPreview" >Click!
+           
+         </iframe>
       `;
+
+      /*body.innerHTML = `
+         <video controls>
+            <source src="rtsp://admin:Kallimage1@192.168.15.55:554/Streaming/Channels/101" type="video/webm">
+         </video>
+      `;*/
 
       cameraWindow.style.display = "block";
 
@@ -962,7 +1076,12 @@ document.addEventListener("mouseup", () => {
 
 
 
-function criarIcone(cor, texto, rua){
+function criarIcone(cor, texto, rua, mensagensAtivas){
+
+   const totalMensagens =
+   mensagensAtivas.length;
+
+   console.log("Criando ícone para", rua.nome, "com", totalMensagens, "mensagens ativas");
 
    return L.divIcon({
 
@@ -974,17 +1093,43 @@ function criarIcone(cor, texto, rua){
 
       html: `
 
-         <div 
-            id="marker-${rua.slug}"
-            class="custom-pin pin-rua"
-            style="
-               background:${cor};
-            "
-         >  
-           ${abreviarRua(rua.nome)}
-         </div>
+      <div
+         style="
+            position:relative;
+         "
 
-      `
+         id="marker-${rua.slug}"
+      >
+
+         ${
+            totalMensagens > 0
+            ?
+            `
+               <div title='${totalMensagens} mensagens ATIVAS' class="marker-badge">
+
+                  ${totalMensagens}
+
+               </div>
+            `
+            :
+            ""
+         }
+
+         <div
+         id="marker-${rua.slug}"
+         class="custom-pin pin-rua"
+         style="
+            background:${cor};
+         "
+      >
+
+         ${abreviarRua(rua.nome)}
+
+      </div>
+
+   </div>
+
+`
    })
 
 }

@@ -30,6 +30,34 @@
 
 verificarLogin();
 
+// vamos verificar os niveis de acesso dele
+
+async function validarAcesso(){
+
+   const { data: auth } =
+   await supabaseGet.auth.getUser();
+
+   if(!auth.user){
+
+      window.location.href = "/login";
+
+      return;
+
+   }
+
+   const { data: usuario } =
+   await supabaseGet
+   .from("usuarios")
+   .select("perfil")
+   .eq("id", auth.user.id)
+   .single();
+
+   return usuario;
+
+}
+
+validarAcesso();
+
 window.addEventListener("DOMContentLoaded", () => {
 
    const menuBtn = document.getElementById("menuBtn");
@@ -108,6 +136,14 @@ function toggleRuas(){
 
  async function carregarRuas(){
 
+   const perfil = await validarAcesso();
+
+   if(perfil.perfil == "ADMIN"){
+      // mostrar cabealhos de edição
+      document.getElementById("thEditar").style.display = "table-cell"
+      document.getElementById("thExcluir").style.display = "table-cell"
+   }
+
    const { data, error } = await supabaseGet
       .from('ruas')
       .select('*')
@@ -183,23 +219,32 @@ function toggleRuas(){
                </button>
             </td>
 
-            <td>
-               <button
-                  class="btn-action btn-edit"
-                  onclick='editarRua(${JSON.stringify(rua)})'
-               >
-                  Editar
-               </button>
-            </td>
+            ${
+               
+               perfil.perfil == "ADMIN"
+               ?
+               `
+                  <td>
+                     <button
+                        class="btn-action btn-edit"
+                        onclick='editarRua(${JSON.stringify(rua)})'
+                     >
+                        Editar
+                     </button>
+                  </td>
 
-            <td>
-               <button
-                  class="btn-action btn-delete"
-                  onclick="excluirRua(${rua.id})"
-               >
-                  Excluir
-               </button>
-            </td>
+                  <td>
+                     <button
+                        class="btn-action btn-delete"
+                        onclick="excluirRua(${rua.id})"
+                     >
+                        Excluir
+                     </button>
+                  </td>
+               `
+               :
+               ""
+            }
 
          </tr>
 
