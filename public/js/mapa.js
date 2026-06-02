@@ -323,6 +323,7 @@ carregarRua()
 
         const ruaId = msg.id_rua
         const tipo_servico = msg.tipo_servico
+        const distancia = msg.distancia
 
         let statusTexto = ""
         let idMensagem = msg.id
@@ -345,7 +346,7 @@ carregarRua()
 
         }
 
-        atualizarStatus(ruaId, statusTexto, idMensagem)
+        atualizarStatus(ruaId, statusTexto, idMensagem, distancia)
 
       }
     )
@@ -416,7 +417,7 @@ carregarRua()
 
       // vamos desabilitar todos os alertas
       const todosCards = document.querySelectorAll(".pin-rua");
-      //console.log(todosCards)
+      console.log(todosCards)
       todosCards.forEach(c => c.classList.remove("marker-alerta"));
 
       // vamos desabilitar todos os alertas
@@ -479,6 +480,7 @@ carregarRua()
             // desativa alerta
 
             const divStatus = document.getElementById("status-" + ruaId);
+            document.getElementById('marker-' + ruaId).classList.remove("marker-alerta");
 
             console.log("Parando alerta da rua", ruaId, "com status", divStatus);
 
@@ -640,7 +642,8 @@ carregarRua()
     function atualizarStatus(
       ruaId,
       statusTexto,
-      idMensagem
+      idMensagem,
+      distancia
     ){
 
       const divStatus =
@@ -661,7 +664,7 @@ carregarRua()
       } else {
 
           // exibe o status
-          divStatus.textContent = "ID: " + idMensagem + " - " + statusTexto;
+          divStatus.textContent = "ID: " + idMensagem + " - " + statusTexto + " - Distância: " + parseFloat(distancia).toFixed(0) + " metros";
 
           divStatus.classList.remove("status-hidden");
 

@@ -123,7 +123,9 @@
     // 6️⃣ Eventos dos botões
     btnVideo.addEventListener('click', async function() {
       const latlong = await solicitarLocalizacao();
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      const continuarAtendimento = await enviarMensagem("btnVideo", latlong)
+      if(continuarAtendimento){
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         .then(function(stream) {
           //localVideo.srcObject = stream;
           previewWrap.style.display = 'block';
@@ -131,22 +133,27 @@
         .catch(function() {
           alert('Não foi possível acessar a câmera. Verifique permissões.');
         });
-      enviarMensagem("btnVideo", latlong)
+      }
+      
       //window.open(VIDEO_MEETING_URL, '_blank');
     });
 
     btnPhone.addEventListener('click', async function() {
        const latlong = await solicitarLocalizacao();
-      enviarMensagem("btnPhone", latlong)
-      var tel = buildTelWithExtension(PHONE_NUMBER, EXTENSION);
-      window.location.href = tel;
+      const continuarAtendimento = await enviarMensagem("btnPhone", latlong)
+      if(continuarAtendimento){
+        var tel = buildTelWithExtension(PHONE_NUMBER, EXTENSION);
+        window.location.href = tel;
+      }
     });
 
     btnWhats.addEventListener('click', async function() {
       const latlong = await solicitarLocalizacao();
-      enviarMensagem("btnWhats", latlong)
-      var url = "https://wa.me/" + WHATS_NUMBER + "?text=" + WHATS_MESSAGE;
-      window.open(url, '_blank');
+      const continuarAtendimento = await enviarMensagem("btnWhats", latlong)
+      if(continuarAtendimento){
+        var url = "https://wa.me/" + WHATS_NUMBER + "?text=" + WHATS_MESSAGE;
+        window.open(url, '_blank');
+      }
     });
 
   };
@@ -267,12 +274,33 @@
 
       async function enviarMensagem(btnID, latlong){
 
+        // vamos calcular a distancia entre ele o o local do chamado, para enviar essa informação para o atendente
+
+          const d = await calcularDistancia("-23.61539021554712", "-46.637918972017246", latlong.lat, latlong.lng);
+
+          console.log("Distancia do usuário ao local do chamado:", d, "metros");
+
+          let escolha = "Sim"
+
+          if(d > 100){
+              escolha = await alertaGlobal(
+              "Parece que você está a mais de 100 metros do local do chamado. Deseja enviar mesmo assim?",
+              [
+                {texto:"Sim"},
+                {texto:"Não"}
+              ]
+            );
+          }
+
+          if(escolha == "Não"){
+            return false;
+          }
+
         const dispositivoTipo = navigator.userAgent;
         const conexaoTipo = navigator.connection;
 
         const marcaCelular =  detectarMarca(navigator.userAgent)
 
-        console.log("Marca dispositivo", marcaCelular)
 
       //  const input = document.getElementById(`cw_input_${targetId}`);
       //  const idAnexo = document.getElementById(`file_${targetId}`).dataset.idAnexo;
@@ -290,7 +318,8 @@
               dispositivo: dispositivoTipo,
               conexao: conexaoTipo,
               latitude: latlong.lat,
-              longitude: latlong.lng
+              longitude: latlong.lng,
+              distancia: d,
             });
 
           if (error) console.error(error);
@@ -300,7 +329,36 @@
         if(btnID == "btnVideo"){
           abrirChamadaDeVideo()
         }
+
+        return true;
         
+      }
+
+      async function calcularDistancia(lat1, long1, lat2, long2){
+
+        console.log("Calculando distância entre:", {lat1, long1, lat2, long2})
+
+        var R = 6371e3;
+
+        var lat1radians = toRadians(lat1);
+        var lat2radians = toRadians(lat2);
+
+        var latRadians = toRadians(lat2 - lat1);
+        var longRadians = toRadians(long2 - long1);
+
+        var a = Math.sin(latRadians/2) * Math.sin(latRadians/2) +
+            Math.cos(lat1radians) * Math.cos(lat2radians) *
+            Math.sin(longRadians/2) * Math.sin(longRadians/2);
+
+            var c = 2* Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            var d = R * c;
+
+          function toRadians(val){
+            var PI = 3.1415926535;
+            return val / 180.0 * PI; }
+
+        return d;
+
       }
 
       async function enviarMensagemChamado(btnID){
