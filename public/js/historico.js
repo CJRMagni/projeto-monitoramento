@@ -85,15 +85,7 @@ async function carregarHistorico(){
 
    const { data, error } = await supabaseGet
       .from("mensagens_alertas")
-      .select(`
-         id,
-         created_at,
-         atendente,
-         id_rua,
-         tipo_servico,
-         dispositivo,
-         conexao
-      `)
+      .select('*')
       .order("id", { ascending: false })
 
    if(error){
@@ -111,7 +103,10 @@ async function carregarHistorico(){
 
    for (const item of data) {
 
-      const dataFormatada = new Date(item.created_at)
+      const dataFormatadaInicio = new Date(item.created_at)
+      .toLocaleString("pt-BR")
+
+      const dataFormatadaFim = new Date(item.hora_fim)
       .toLocaleString("pt-BR")
 
       const atendimentos = await buscarAtendimentos(item.id)
@@ -162,13 +157,21 @@ async function carregarHistorico(){
 
             <td>${item.id}</td>
 
-            <td>${dataFormatada}</td>
+            <td>${item.status}</td>
+
+            <td>${dataFormatadaInicio}</td>
+
+            <td>${dataFormatadaFim}</td>
 
             <td>${item.atendente || "-"}</td>
 
             <td>${atendimentos.length || "-"}</td>
 
             <td>${item.id_rua || "-"}</td>
+
+            <td>${item.latitude || "-"}, ${item.longitude || "-"}</td>
+
+            <td>${Number(item.distancia).toFixed(2) || "-"} metros</td>
 
             <td>${item.tipo_servico || "-"}</td>
 

@@ -3,6 +3,8 @@
 
   let latitude = null;
   let longitude = null;
+  let idMensagem = null;
+  let idMensagem_alerta = null;
 
   const ruaNome = rua
                   .replace(/-/g, ' ')
@@ -74,6 +76,14 @@
 }
     
 
+  window.addEventListener("beforeunload", async (e) => {
+
+    if(idMensagem_alerta){
+       await enviarMensagemEncerramento(rua);
+    }
+
+  });
+
   window.onload = function() {
 
     // === CONFIGURAÇÕES ===
@@ -122,7 +132,7 @@
 
     // 6️⃣ Eventos dos botões
     btnVideo.addEventListener('click', async function() {
-      const latlong = await solicitarLocalizacao();
+       latlong = await solicitarLocalizacao();
       const continuarAtendimento = await enviarMensagem("btnVideo", latlong)
       if(continuarAtendimento){
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -139,7 +149,7 @@
     });
 
     btnPhone.addEventListener('click', async function() {
-       const latlong = await solicitarLocalizacao();
+        latlong = await solicitarLocalizacao();
       const continuarAtendimento = await enviarMensagem("btnPhone", latlong)
       if(continuarAtendimento){
         var tel = buildTelWithExtension(PHONE_NUMBER, EXTENSION);
@@ -148,7 +158,7 @@
     });
 
     btnWhats.addEventListener('click', async function() {
-      const latlong = await solicitarLocalizacao();
+       latlong = await solicitarLocalizacao();
       const continuarAtendimento = await enviarMensagem("btnWhats", latlong)
       if(continuarAtendimento){
         var url = "https://wa.me/" + WHATS_NUMBER + "?text=" + WHATS_MESSAGE;
@@ -228,11 +238,13 @@
     function setOnline() {
       statusDiv.textContent = "Atendente Online";
       statusDiv.style.background = "#28a745";
+      document.getElementById("btnVideo").disabled = false;
     }
 
     function setOffline() {
       statusDiv.textContent = "Nenhum atendente disponível";
       statusDiv.style.background = "#adb5bd";
+      document.getElementById("btnVideo").disabled = true;
     }
 
     // Estado inicial
@@ -269,6 +281,11 @@
 
     // tabela que iremos salvar os eventos de clique do usuário
     const CHAT_TABLE = "mensagens_alertas";
+    let dispositivoTipo = ""
+    let conexaoTipo = ""
+    let marcaCelular =  ""
+    let latlong = {lat: null, lng: null}
+    let d = null
 
     // quando o usuario clicar em algum dos itens, vamos enviar para o atendente....
 
@@ -283,7 +300,7 @@
               return false;
            }
 
-          const d = await calcularDistancia(pegarRua[0].lat, pegarRua[0].long, latlong.lat, latlong.lng);
+           d = await calcularDistancia(pegarRua[0].lat, pegarRua[0].long, latlong.lat, latlong.lng);
 
           console.log("Distancia do usuário ao local do chamado:", d, "metros");
 
@@ -303,10 +320,9 @@
             return false;
           }
 
-        const dispositivoTipo = navigator.userAgent;
-        const conexaoTipo = navigator.connection;
-
-        const marcaCelular =  detectarMarca(navigator.userAgent)
+         dispositivoTipo = navigator.userAgent;
+         conexaoTipo = navigator.connection;
+         marcaCelular =  detectarMarca(navigator.userAgent)
 
 
       //  const input = document.getElementById(`cw_input_${targetId}`);
@@ -316,22 +332,37 @@
 
         // inserir no supabase
         try {
-          const { data, error } = await supabaseGet
-            .from("mensagens_alertas")
-            .insert({
-              id_rua: rua,
-              tipo_servico: btnID,
-              atendente : emailAtendente,
-              dispositivo: dispositivoTipo,
-              conexao: conexaoTipo,
-              latitude: latlong.lat,
-              longitude: latlong.lng,
-              distancia: d,
-            });
 
-          if (error) console.error(error);
-          else console.log("OK:", data);
-        } catch(e){ console.error("erro enviar", e); }
+        const { data, error } = await supabaseGet
+          .from("mensagens_alertas")
+          .insert({
+            id_rua: rua,
+            tipo_servico: btnID,
+            atendente: emailAtendente,
+            dispositivo: dispositivoTipo,
+            conexao: conexaoTipo,
+            latitude: latlong.lat,
+            longitude: latlong.lng,
+            distancia: d,
+            status: "ABERTURA"
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        console.log("OK:", data);
+
+        idMensagem_alerta = data.id;
+
+        console.log("ID gerado:", idMensagem_alerta);
+
+      } catch (e) {
+        console.error("erro enviar", e);
+      }
 
         if(btnID == "btnVideo"){
           abrirChamadaDeVideo()
@@ -340,6 +371,37 @@
         return true;
         
       }
+
+      async function enviarMensagemEncerramento(btnID){
+
+          console.log("Encerrando chamado", idMensagem_alerta);
+
+          try {
+
+              const { data, error } = await supabaseGet
+                  .from("mensagens_alertas")
+                  .update({
+                      status: "ENCERRADO",
+                      hora_fim: new Date().toISOString(),
+                      atendente: emailAtendente
+                  })
+                  .eq("id", idMensagem_alerta)
+                  .select();
+
+              if (error) {
+                  console.error(error);
+                  return;
+              }
+
+              console.log("Chamado encerrado:", data);
+
+          } catch(e) {
+
+              console.error("Erro ao encerrar chamado:", e);
+
+          }
+
+     }
 
       async function calcularDistancia(lat1, long1, lat2, long2){
 
@@ -402,13 +464,13 @@
 
           if (error) console.error(error)
           else console.log("retorno salvo:", data);
-          const idMensagem = data.id;
+           idMensagem = data.id;
           await salvarAnexosMensagem(idMensagem)
         } catch(e){ console.error("erro enviar", e); }
 
-        if(btnID == "btnVideo"){
+        /*if(btnID == "btnVideo"){
           abrirChamadaDeVideo()
-        }
+        }*/
         
       }
 
@@ -523,16 +585,19 @@
         api.addEventListener('videoConferenceLeft', () => {
           console.log("Call finalizada");
 
+           enviarMensagemEncerramento(rua);
+
           // atualizar supabase
-          supabaseGet
+          /*supabaseGet
             .from("mensagens_alertas")
-            .insert({ tipo_servico: "VIDEO_FINALIZADO" });
+            .insert({ tipo_servico: "VIDEO_FINALIZADO" });*/
 
           // limpar tela
           document.getElementById("jaas-container").innerHTML = "";
 
           // message
           alert("Chamada finalizada!");
+          previewWrap.style.display = 'none';
         });
 
       }
@@ -558,7 +623,7 @@
 
       async function abrirModalMensagem(){
 
-        const latlong = await solicitarLocalizacao();
+         latlong = await solicitarLocalizacao();
 
         document
             .getElementById("modalMensagem")

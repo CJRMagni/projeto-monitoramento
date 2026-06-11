@@ -272,6 +272,9 @@
         .filter(u => u.id !== "atendente")
         .map(u => u.id);
 
+        console.log("IDs online:", idsOnline)
+        console.log("idsEmSala:", idsEmSala)
+
         // se o ID com sala aberta não estiver na lista de abertos, vamos fechar a sala
 
         if (!idsOnline.some(id => idsEmSala.includes(id))) {

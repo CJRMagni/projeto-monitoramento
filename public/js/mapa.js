@@ -32,6 +32,17 @@
 
    let idsOnline = [];
 
+   async function iniciarSistema() {
+
+   await carregarRua();
+   iniciarRealtimeMensagens()
+   console.log("Ruas carregadas, iniciando canal de mensagens...")
+
+   criarCanal()
+   }
+
+   iniciarSistema();
+
 
    window.addEventListener("load", () => {
         setTimeout(() => {
@@ -198,7 +209,15 @@
 
    }
 
+  
+
 }
+
+
+
+function criarCanal(){
+
+   console.log("Criando canal de mensagens...")
 
 // vamos criar um canal para ouvir a tabela de mensagens, para mostrar na tela...
 const channelMensagens = supabaseGet
@@ -240,6 +259,8 @@ const channelMensagens = supabaseGet
 
   .subscribe();
 
+}
+
 function centralizarTodasRuas(){
 
    const bounds = [];
@@ -278,7 +299,7 @@ function centralizarTodasRuas(){
 }
 
 
-carregarRua()
+
 
  async function buscarMensagem(slug){
 
@@ -307,12 +328,14 @@ carregarRua()
     let conversasRecentes = []; // carregado do supabase
     let usuariosOnline = []; // array formatado [{id,nome,perfil,online}]
 
+    function iniciarRealtimeMensagens(){
+
     const canal = supabaseGet
     .channel("mensagens_realtime")
     .on(
       "postgres_changes",
       {
-        event: "INSERT",
+        event: "*",
         schema: "public",
         table: "mensagens_alertas",
       },
@@ -323,12 +346,14 @@ carregarRua()
 
         const ruaId = msg.id_rua
         const tipo_servico = msg.tipo_servico
+        const status = msg.status
         const distancia = msg.distancia
+        const sistema = msg.dispositivo.match(/\(([^)]+)\)/)?.[1];
 
         let statusTexto = ""
         let idMensagem = msg.id
       
-        if(tipo_servico == "btnVideo"){
+        if(tipo_servico == "btnVideo" && status == "ABERTURA"){
 
           statusTexto = "CHAMADA POR VÍDEO"
 
@@ -336,17 +361,17 @@ carregarRua()
 
           abrirChamadaDeVideo(ruaId)
 
-        } else if(tipo_servico == "btnPhone"){
+        } else if(tipo_servico == "btnPhone" && status == "ABERTURA"){
 
           statusTexto = "LIGAÇÃO TELEFONE"
 
-        } else if(tipo_servico == "btnWhats"){
+        } else if(tipo_servico == "btnWhats" && status == "ABERTURA"){
 
           statusTexto = "CONTATO POR WHATS APP"
 
         }
 
-        atualizarStatus(ruaId, statusTexto, idMensagem, distancia)
+        atualizarStatus(ruaId, statusTexto, idMensagem, distancia, sistema, status)
 
       }
     )
@@ -411,6 +436,8 @@ carregarRua()
       }
     });
 
+   }
+
     const idsEmSala = []
 
     function atualizarListaOnline(lista) {
@@ -432,6 +459,9 @@ carregarRua()
         .filter(u => u.id !== "atendente")
         .map(u => u.id);
 
+        console.log("IDs online:", idsOnline)
+        console.log("idsEmSala:", idsEmSala)
+
         // se o ID com sala aberta não estiver na lista de abertos, vamos fechar a sala
 
         if (!idsOnline.some(id => idsEmSala.includes(id))) {
@@ -448,22 +478,21 @@ carregarRua()
       listaRuas.forEach(ruaId => {
         const ativo = idsOnline.includes(ruaId);
 
+        console.log("Atualizando rua", ruaId, "ativo?", ativo)
+
         if (ativo) {
 
            ativarPopupAlerta(ruaId);
 
             document
-            .getElementById('marker-' + ruaId)
-            .classList.add("marker-alerta");
-            
+            .getElementById('marker-' + ruaId).classList.add("marker-alerta");
 
+         
             // pega marker leaflet
             const marker =
             markersRuas[ruaId];
 
             if(marker){
-
-               console.log("Ativando alerta para marker da rua", ruaId);
 
                //marker.openPopup();
 
@@ -480,6 +509,9 @@ carregarRua()
             // desativa alerta
 
             const divStatus = document.getElementById("status-" + ruaId);
+
+            console.log("teste2",  document.getElementById('status-' + ruaId), ruaId)
+
             document.getElementById('marker-' + ruaId).classList.remove("marker-alerta");
 
             console.log("Parando alerta da rua", ruaId, "com status", divStatus);
@@ -643,11 +675,19 @@ carregarRua()
       ruaId,
       statusTexto,
       idMensagem,
-      distancia
+      distancia,
+      sistema,
+      status
     ){
+
+      console.log("Atualizando status da rua", ruaId, "para", statusTexto, "com idMensagem", idMensagem)
+
+
 
       const divStatus =
       document.getElementById("status-" + ruaId);
+
+      const infoSistema = document.getElementById("info-sistema-" + ruaId);
 
       if (!divStatus) return;
 
@@ -658,16 +698,23 @@ carregarRua()
 
           // oculta o status
           divStatus.textContent = "";
+          infoSistema.textContent = "";
 
           divStatus.classList.add("status-hidden");
 
       } else {
 
           // exibe o status
-          divStatus.textContent = "ID: " + idMensagem + " - " + statusTexto + " - Distância: " + parseFloat(distancia).toFixed(0) + " metros";
+          divStatus.textContent = "ID: " + idMensagem + " - " + statusTexto
+          infoSistema.textContent = "Dispositivo: " + sistema + " - Distancia: " + parseFloat(distancia).toFixed(0) + " metros"; 
 
           divStatus.classList.remove("status-hidden");
 
+      }
+
+      if(status == "ENCERRADO"){
+          fecharVideo()
+         alert("Atendimento encerrado para a rua " + ruaId)
       }
 
     }
@@ -783,6 +830,8 @@ function criarPopupAlerta(ruaId){
                📞 Telefone
             </button> -->
 
+         </div>
+         <div id="info-sistema-${ruaId}" >
          </div>
 
           
